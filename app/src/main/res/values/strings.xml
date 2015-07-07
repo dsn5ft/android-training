@@ -1,0 +1,13 @@
+<resources>
+
+    <string name="app_name">Fill Murray Viewer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="fill_murray">Fill Murray</string>
+    <string name="place_cage">Place Cage</string>
+    <string name="surprise_me">Surprise Me!</string>
+
+    <string name="android_training">Android Training</string>
+
+</resources>
