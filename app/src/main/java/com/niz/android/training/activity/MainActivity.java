@@ -1,11 +1,5 @@
 package com.niz.android.training.activity;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -20,7 +14,6 @@ import com.niz.android.training.api.model.Image;
 import com.niz.android.training.service.ImageService;
 import com.niz.android.training.service.ImageType;
 import com.niz.android.training.util.ImageLoaderUtils;
-import org.apache.commons.io.IOUtils;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -82,44 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void startImageListActivity(ImageType imageType) {
         startActivity(ImageListActivity.getIntent(this, imageType));
-    }
-
-    private void makeNonBlockingApiCall() {
-        String url = "http://live.yodle.com/api/v1/contacts/12345";
-
-        new AsyncTask<String, Void, String>() {
-            @Override
-            protected String doInBackground(String... params) {
-                return makeBlockingApiCall(params[0]);
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                // do something with result (update UI)
-            }
-        }.execute(url);
-    }
-
-    private String makeBlockingApiCall(String url) {
-        StringBuilder response = new StringBuilder();
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-        try {
-            urlConnection = (HttpURLConnection) new URL(url).openConnection();
-            if (urlConnection.getResponseCode() == 200) {
-                reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (urlConnection != null) urlConnection.disconnect();
-            if (reader != null) IOUtils.closeQuietly(reader);
-        }
-        return response.toString();
     }
 
     @Override
