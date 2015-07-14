@@ -6,11 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.view.Menu;
-import android.view.MenuItem;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.niz.android.training.R;
@@ -18,6 +17,7 @@ import com.niz.android.training.adapter.ImageAdapter;
 import com.niz.android.training.api.model.Image;
 import com.niz.android.training.service.ImageService;
 import com.niz.android.training.service.ImageType;
+import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -41,30 +41,42 @@ public class ImageListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image_list);
         ButterKnife.inject(this);
 
-        String typeString = getIntent().getStringExtra(KEY_IMAGE_TYPE);
-        imageType = ImageType.fromType(typeString);
-        getSupportActionBar().setTitle(imageType.getTitle(this));
+        setActionBarTitle(getIntent());
 
         imageService = new ImageService();
 
-        layoutManager = new StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL);
-
-        imageRecyclerView.setHasFixedSize(true);
-        imageRecyclerView.setLayoutManager(layoutManager);
-
-        imageAdapter = new ImageAdapter(ImageListActivity.this, new ImageAdapter.LoadMoreCallback() {
-            @Override
-            public void onLoadMore() {
-                loadImagesWithDelay();
-            }
-        });
-        imageRecyclerView.setAdapter(imageAdapter);
+        setupImageList();
     }
 
     public static Intent getIntent(Context context, ImageType imageType) {
         Intent intent = new Intent(context, ImageListActivity.class);
         intent.putExtra(KEY_IMAGE_TYPE, imageType.getType());
         return intent;
+    }
+
+    private void setActionBarTitle(Intent intent) {
+        String typeString = intent.getStringExtra(KEY_IMAGE_TYPE);
+        imageType = ImageType.fromType(typeString);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(imageType.getTitle(this));
+        }
+    }
+
+    private void setupImageList() {
+        layoutManager = new StaggeredGridLayoutManager(SPAN_COUNT, StaggeredGridLayoutManager.VERTICAL);
+
+        imageAdapter = new ImageAdapter(ImageListActivity.this, new ImageAdapter.LoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                loadImagesWithDelay();
+            }
+        });
+
+        imageRecyclerView.setLayoutManager(layoutManager);
+        imageRecyclerView.setAdapter(imageAdapter);
+        imageRecyclerView.setHasFixedSize(true);
+        imageRecyclerView.setItemAnimator(new SlideInUpAnimator());
     }
 
     private void loadImagesWithDelay() {
@@ -80,7 +92,7 @@ public class ImageListActivity extends AppCompatActivity {
         imageService.getImages(imageType, IMAGE_BATCH_SIZE, new Callback<List<Image>>() {
             @Override
             public void success(List<Image> images, Response response) {
-                imageAdapter.addImages(images);
+                imageAdapter.addImages(images, layoutManager);
             }
 
             @Override
@@ -88,21 +100,5 @@ public class ImageListActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_image_list, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                // TODO: launch settings page
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }
