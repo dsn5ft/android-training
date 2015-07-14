@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.niz.android.training.R;
@@ -70,6 +71,12 @@ public class ImageListActivity extends AppCompatActivity {
             @Override
             public void onLoadMore() {
                 loadImagesWithDelay();
+            }
+        });
+        imageAdapter.setImageClickListener(new ImageAdapter.ImageClickListener() {
+            @Override
+            public void onImageClicked(Image image) {
+                Toast.makeText(ImageListActivity.this, image.getTitle(), Toast.LENGTH_SHORT).show();
             }
         });
 

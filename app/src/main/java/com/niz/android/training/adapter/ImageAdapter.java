@@ -22,6 +22,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private Context context;
     private ImageLoaderUtils imageLoaderUtils;
     private List<Image> imageList;
+    private ImageClickListener imageClickListener;
     private LoadMoreListener loadMoreListener;
 
     public ImageAdapter(Context context, LoadMoreListener loadMoreListener) {
@@ -29,6 +30,10 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.imageLoaderUtils = new ImageLoaderUtils();
         this.imageList = new ArrayList<>();
         this.loadMoreListener = loadMoreListener;
+    }
+
+    public void setImageClickListener(ImageClickListener imageClickListener) {
+        this.imageClickListener = imageClickListener;
     }
 
     @Override
@@ -53,9 +58,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         switch (getViewHolderType(position)) {
             case IMAGE:
-                Image image = imageList.get(position);
-                ImageViewHolder imageViewHolder = (ImageViewHolder) holder;
-                imageLoaderUtils.loadImage(context, image, imageViewHolder.imageView, imageViewHolder.title);
+                bindImageViewHolder((ImageViewHolder) holder, imageList.get(position));
                 break;
             case LOADING:
                 loadMoreListener.onLoadMore();
@@ -80,6 +83,18 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         } else {
             return ViewHolderType.LOADING;
         }
+    }
+
+    private void bindImageViewHolder(ImageViewHolder imageViewHolder, final Image image) {
+        imageLoaderUtils.loadImage(context, image, imageViewHolder.imageView, imageViewHolder.title);
+        imageViewHolder.setImageClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (imageClickListener != null) {
+                    imageClickListener.onImageClicked(image);
+                }
+            }
+        });
     }
 
     /*
@@ -128,6 +143,11 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         public ImageViewHolder(View view) {
             super(view);
             ButterKnife.inject(this, view);
+
+        }
+
+        public void setImageClickListener(View.OnClickListener onClickListener) {
+            imageView.setOnClickListener(onClickListener);
         }
     }
 
@@ -136,6 +156,10 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         public LoadingViewHolder(View itemView) {
             super(itemView);
         }
+    }
+
+    public interface ImageClickListener {
+        void onImageClicked(Image image);
     }
 
     public interface LoadMoreListener {
