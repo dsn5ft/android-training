@@ -10,14 +10,17 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.ImageView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 import com.niz.android.training.R;
 import com.niz.android.training.adapter.ImageAdapter;
 import com.niz.android.training.api.model.Image;
 import com.niz.android.training.service.ImageService;
 import com.niz.android.training.service.ImageType;
+import com.niz.android.training.util.Animations;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -35,6 +38,12 @@ public class ImageListActivity extends AppCompatActivity {
     private ImageAdapter imageAdapter;
 
     @InjectView(R.id.imageRecyclerView) RecyclerView imageRecyclerView;
+    @InjectView(R.id.fullscreenImageView) ImageView fullscreenImageView;
+
+    @OnClick(R.id.fullscreenImageView)
+    public void onFullscreenImageClicked() {
+        hideFullscreenImage();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +56,15 @@ public class ImageListActivity extends AppCompatActivity {
         imageService = new ImageService();
 
         setupImageList();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (fullscreenImageView.getVisibility() == View.VISIBLE) {
+            hideFullscreenImage();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     public static Intent getIntent(Context context, ImageType imageType) {
@@ -75,8 +93,8 @@ public class ImageListActivity extends AppCompatActivity {
         });
         imageAdapter.setImageClickListener(new ImageAdapter.ImageClickListener() {
             @Override
-            public void onImageClicked(Image image) {
-                Toast.makeText(ImageListActivity.this, image.getTitle(), Toast.LENGTH_SHORT).show();
+            public void onImageClicked(Image image, ImageView imageView) {
+                showFullscreenImage(imageView);
             }
         });
 
@@ -107,5 +125,14 @@ public class ImageListActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showFullscreenImage(ImageView listItemImageView) {
+        fullscreenImageView.setImageDrawable(listItemImageView.getDrawable());
+        Animations.slideInFromBottom(this, fullscreenImageView);
+    }
+
+    private void hideFullscreenImage() {
+        Animations.slideOutToBottom(this, fullscreenImageView);
     }
 }

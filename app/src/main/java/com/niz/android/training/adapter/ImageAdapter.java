@@ -85,13 +85,13 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    private void bindImageViewHolder(ImageViewHolder imageViewHolder, final Image image) {
+    private void bindImageViewHolder(final ImageViewHolder imageViewHolder, final Image image) {
         imageLoaderUtils.loadImage(context, image, imageViewHolder.imageView, imageViewHolder.title);
         imageViewHolder.setImageClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (imageClickListener != null) {
-                    imageClickListener.onImageClicked(image);
+                    imageClickListener.onImageClicked(image, imageViewHolder.imageView);
                 }
             }
         });
@@ -159,7 +159,7 @@ public class ImageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public interface ImageClickListener {
-        void onImageClicked(Image image);
+        void onImageClicked(Image image, ImageView imageView);
     }
 
     public interface LoadMoreListener {
